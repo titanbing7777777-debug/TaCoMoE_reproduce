@@ -199,7 +199,7 @@ class MMOELoraLinearS(MMOELoraLinear):
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
         elif self.r[self.active_adapter] > 0 and not self.merged:   # general lora process
             #print('general lora process')
-            result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias).permute(1, 0, 2)
+            result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
 
             x = x.to(self.lora_A[self.active_adapter].loraA[0].weight.dtype)
             nce_loss = 1e-8
