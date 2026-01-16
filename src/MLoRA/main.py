@@ -43,7 +43,7 @@ from src.MLoRA.trainer_seq2seq import Seq2SeqTrainer
 from src.MLoRA.peft import PeftModel, TaskType, get_peft_model
 from src.MLoRA.peft import LoraConfig, AdaLoraConfig
 from src.MLoRA.peft import MMOELoraConfigS
-from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
+from src.data_processor.qwen import qwen2_train, qwen2_eval
 from src.data_processor.collator import LongestSequenceCollator
 
 logger = logging.getLogger(__name__)
@@ -213,11 +213,11 @@ def main(parser):
         print("label_ids: ", example["labels"])
         #print("labels: ", tokenizer.decode(example["labels"])) # For ChatGLMv2
     
-    if model_args.model_name_or_path.split("/")[-1] == "chatglm3-6b" or model_args.model_name_or_path.split("/")[-1] == "chatglm-6b":
-        preprocess_function_train = chatglm1_train(data_args, model_args, prompt_column,
+    if model_args.model_name_or_path.split("/")[-1] == "qwen2-7b" or model_args.model_name_or_path.split("/")[-1] == "qwen2-7b":
+        preprocess_function_train = qwen2_train(data_args, model_args, prompt_column,
                                                    response_column, history_column, prefix,
                                                    tokenizer, task_flag, depart_flag)
-        preprocess_function_eval = chatglm1_eval(data_args, model_args, prompt_column,
+        preprocess_function_eval = qwen2_eval(data_args, model_args, prompt_column,
                                                  response_column, history_column, prefix,
                                                  tokenizer, task_flag, depart_flag)
     else:
@@ -346,7 +346,7 @@ def main(parser):
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
-        save_prefixencoder=model_args.pre_seq_len is not None
+        # save_prefixencoder=model_args.pre_seq_len is not None
     )
 
     # Training
