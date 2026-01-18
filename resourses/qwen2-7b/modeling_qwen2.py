@@ -64,6 +64,12 @@ class CausalLMOutputWithPastAndConLoss(CausalLMOutputWithPast):
 class CausalLMOutputWithPast1(CausalLMOutputWithPast):
     con_loss: Optional[torch.FloatTensor] = None  
 
+# 3090 或者 40系列 不支持Flash Attention 2.0
+# if is_flash_attn_2_available():
+#     from flash_attn import flash_attn_func, flash_attn_varlen_func
+#     from flash_attn.bert_padding import index_first_axis, pad_input, unpad_input  # noqa
+
+#     _flash_supports_window_size = "window_size" in list(inspect.signature(flash_attn_func).parameters)
 _flash_supports_window_size = False
 
 
