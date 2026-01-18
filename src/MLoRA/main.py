@@ -31,7 +31,7 @@ from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from rouge_chinese import Rouge
 from transformers import (
     AutoConfig,
-    AutoModel,
+    AutoModelForCausalLM,
     AutoTokenizer,
     DataCollatorForSeq2Seq,
     set_seed,
@@ -124,7 +124,7 @@ def main(parser):
         trust_remote_code=True,
     )
 
-    model = AutoModel.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         trust_remote_code=True
     ).half().cuda()    # .half() represents to use half of orginal accuracy

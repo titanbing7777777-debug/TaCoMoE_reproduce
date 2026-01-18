@@ -29,19 +29,19 @@ import torch.utils.checkpoint
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
-from ...activations import ACT2FN
-from ...cache_utils import Cache, DynamicCache, StaticCache
-from ...modeling_attn_mask_utils import (
+from transformers.activations import ACT2FN
+from transformers.cache_utils import Cache, DynamicCache, StaticCache
+from transformers.modeling_attn_mask_utils import (
     AttentionMaskConverter,
 )
-from ...modeling_outputs import (
+from transformers.modeling_outputs import (
     BaseModelOutputWithPast,
     CausalLMOutputWithPast,
     SequenceClassifierOutputWithPast,
     TokenClassifierOutput,
 )
-from ...modeling_utils import PreTrainedModel
-from ...utils import (
+from transformers.modeling_utils import PreTrainedModel
+from transformers.utils import (
     add_start_docstrings,
     add_start_docstrings_to_model_forward,
     is_flash_attn_2_available,
@@ -49,8 +49,8 @@ from ...utils import (
     logging,
     replace_return_docstrings,
 )
-from .configuration_qwen2 import Qwen2Config
-print('loading model')
+from transformers.models.qwen2.configuration_qwen2 import Qwen2Config
+
 @dataclass
 class BaseModelOutputWithCon(BaseModelOutputWithPast):
     
@@ -64,11 +64,7 @@ class CausalLMOutputWithPastAndConLoss(CausalLMOutputWithPast):
 class CausalLMOutputWithPast1(CausalLMOutputWithPast):
     con_loss: Optional[torch.FloatTensor] = None  
 
-if is_flash_attn_2_available():
-    from flash_attn import flash_attn_func, flash_attn_varlen_func
-    from flash_attn.bert_padding import index_first_axis, pad_input, unpad_input  # noqa
-
-    _flash_supports_window_size = "window_size" in list(inspect.signature(flash_attn_func).parameters)
+_flash_supports_window_size = False
 
 
 logger = logging.get_logger(__name__)
@@ -1322,7 +1318,6 @@ class Qwen2ForCausalLM(Qwen2PreTrainedModel):
         if depart is not None:
             kwargs["depart"] = depart
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
-        print('1276',kwargs)
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,

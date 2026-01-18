@@ -308,13 +308,19 @@ class MMOELoraLinear(nn.Linear, MMOELoraLayer):
             x = x.to(self.lora_A[self.active_adapter].loraA[0].weight.dtype)
 
             expert_weight = self.lora_gate[self.active_adapter](self.lora_task_embedding[self.active_adapter](task_id))
+            
+            if x.size(0) == expert_weight.size(0):
+                ew_view = lambda i: expert_weight[..., i].view(-1, 1, 1)
+            else:
+                ew_view = lambda i: expert_weight[..., i].view(1, -1, 1)
+
             for i in range(self.expert_num):
                 result += ( # lora process
                     self.lora_B[self.active_adapter].loraB[i](
                         self.lora_A[self.active_adapter].loraA[i](self.lora_dropout[self.active_adapter](x)),
                     )
                     * self.scaling[self.active_adapter]
-                    * expert_weight[..., i].unsqueeze(-1).unsqueeze(0)
+                    * ew_view(i)
                 )
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)

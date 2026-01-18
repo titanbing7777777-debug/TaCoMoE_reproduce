@@ -189,7 +189,12 @@ class MMOELoraLinearS(MMOELoraLinear):
         expert_weight = kwargs["task_id"]
         #print('x.dtype',x.dtype)
         previous_dtype = x.dtype
-        seq_len, batch_size, _ = x.size()
+        if x.size(0) == expert_weight.size(0):
+            batch_size, seq_len, _ = x.size()
+            batch_first = True
+        else:
+            seq_len, batch_size, _ = x.size()
+            batch_first = False
        
         if self.active_adapter not in self.lora_A.keys():   # No adapter, directly use linear
             return F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
@@ -205,16 +210,26 @@ class MMOELoraLinearS(MMOELoraLinear):
             nce_loss = 1e-8
             E = []
             for i in range(self.expert_num):
-                A_out = self.lora_A[self.active_adapter].loraA[i](self.lora_dropout[self.active_adapter](x)).reshape(seq_len, batch_size,  1, -1)
+                lora_A_out = self.lora_A[self.active_adapter].loraA[i](self.lora_dropout[self.active_adapter](x))
+                if batch_first:
+                    A_out = lora_A_out.transpose(0, 1).reshape(seq_len, batch_size, 1, -1)
+                else:
+                    A_out = lora_A_out.reshape(seq_len, batch_size, 1, -1)
                 #print('175',result)
                 
                 E.append(A_out)
+
+                lora_B_out = self.lora_B[self.active_adapter].loraB[i](lora_A_out)
+
+                if batch_first:
+                    ew = expert_weight[..., i].view(batch_size, 1, 1)
+                else:
+                    ew = expert_weight[..., i].view(1, batch_size, 1)
+
                 result += ( # lora process
-                    self.lora_B[self.active_adapter].loraB[i](
-                        self.lora_A[self.active_adapter].loraA[i](self.lora_dropout[self.active_adapter](x)),
-                    )
+                    lora_B_out
                     * self.scaling[self.active_adapter]
-                    * expert_weight[..., i].unsqueeze(-1).unsqueeze(0)
+                    * ew
                 )
               
             

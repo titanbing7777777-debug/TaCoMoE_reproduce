@@ -145,7 +145,7 @@ def process_data(dataset_path, outdir_path,mode,language):
                     data_dict = {
                         "input":task_definer(task) + Input,
                         "task_type":task,
-                        "target":_normalize_target(target_u[uid]),
+                        "target":_normalize_target([target_u[uid],uid]),
                         "task_dataset":f"{task}",
                         "sample_id":f"{task}_{data_id}_{uid}"
                     }
@@ -156,7 +156,7 @@ def process_data(dataset_path, outdir_path,mode,language):
                     data_dict = {
                         "input":task_definer(task) + Input,
                         "task_type":task,
-                        "target":_normalize_target(aspect_u[uid]),
+                        "target":_normalize_target([aspect_u[uid],uid]),
                         "task_dataset":f"{task}",
                         "sample_id":f"{task}_{data_id}_{uid}"
                     }
@@ -167,7 +167,7 @@ def process_data(dataset_path, outdir_path,mode,language):
                     data_dict = {
                         "input":task_definer(task) + Input,
                         "task_type":task,
-                        "target":_normalize_target(opinion_u[uid]),
+                        "target":_normalize_target([opinion_u[uid],uid]),
                         "task_dataset":f"{task}",
                         "sample_id":f"{task}_{data_id}_{uid}"
                     }

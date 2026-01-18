@@ -12,7 +12,10 @@ your_data_path="data/en/task"
 your_checkpopint_path="saved/qwen2-7b/en/task"  
 MAX_SOURCE_LENGTH=2048
 
-DS_SKIP_CUDA_CHECK=1
+export DS_SKIP_CUDA_CHECK=1
+export NCCL_P2P_DISABLE=1
+export NCCL_IB_DISABLE=1
+export TOKENIZERS_PARALLELISM=false
 
 # Prefer the conda env C++ runtime to satisfy CXXABI_1.3.15 for _sqlite3/ICU
 if [ -z "$CONDA_PREFIX" ]; then
