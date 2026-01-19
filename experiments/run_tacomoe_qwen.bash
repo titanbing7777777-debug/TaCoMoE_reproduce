@@ -8,7 +8,7 @@ MAX_STEPS=16870
 SAVE_STEPS=1687
 MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 USER_DIR="/share/home/tm891982051140000/a945582010/"
-model_name_or_path="resources/qwen2-7b"   
+model_name_or_path="resources/qwen2-7b"
 your_data_path="data/en/task"
 TIME=$(date +%Y%m%d_%H%M%S)
 your_checkpopint_path="$USER_DIR/saved/saved_$TIME/qwen2-7b/en/task"
@@ -31,7 +31,7 @@ export LD_PRELOAD="$CONDA_PREFIX/lib/libstdc++.so.6${LD_PRELOAD:+:$LD_PRELOAD}"
 deepspeed --num_gpus=2 --master_port $MASTER_PORT run_tacomoe.py \
     --deepspeed src/ds.config \
     --do_train \
-    --train_file $your_data_path/test.json \
+    --train_file $your_data_path/train.json \
     --cache_dir $your_data_path \
     --prompt_column input \
     --response_column target \
@@ -52,7 +52,7 @@ deepspeed --num_gpus=2 --master_port $MASTER_PORT run_tacomoe.py \
     --trainable ${lora_trainable} \
     --modules_to_save ${modules_to_save} \
     --lora_dropout ${lora_dropout} \
-    --fp16 \
+    --bf16 \
     --lora_name moelora \
     --expert_num 8
 

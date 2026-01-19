@@ -3337,7 +3337,7 @@ class Trainer:
             #con_loss = self.deepspeed.backward(0.02*con_loss, retain_graph=True)
             #loss = self.deepspeed.backward(loss)
             #con_loss.requires_grad_(True)
-            
+            print(f'[Rank {self.args.local_rank}] Step {self.state.global_step}:', {"loss": loss.item() if hasattr(loss, "item") else loss, "con_loss": con_loss.item() if hasattr(con_loss, "item") else con_loss})
             #print('1050',{"loss": loss, "con_loss": con_loss})
         else:
             self.accelerator.backward(loss, **kwargs)
