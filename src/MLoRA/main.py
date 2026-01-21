@@ -412,12 +412,30 @@ def main(parser):
 
         if trainer.is_world_process_zero():
             if training_args.predict_with_generate:
+                # Clean up generated ids to avoid tokenizer decode overflows when label ids contain ignore index
+                predictions = predict_results.predictions
+                label_ids = predict_results.label_ids
+
+                # Some trainers return tuple predictions
+                if isinstance(predictions, tuple):
+                    predictions = predictions[0]
+
+                # Ensure pad token exists for replacement
+                if tokenizer.pad_token_id is None:
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+
+                predictions = np.array(predictions, dtype=np.int64)
+                label_ids = np.array(label_ids, dtype=np.int64)
+
+                # Replace ignore index with a valid pad id to keep tokenizers happy
+                label_ids = np.where(label_ids == -100, tokenizer.pad_token_id, label_ids)
+
                 predictions = tokenizer.batch_decode(
-                    predict_results.predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
+                    predictions.tolist(), skip_special_tokens=True, clean_up_tokenization_spaces=True
                 )
                 predictions = [pred.strip() for pred in predictions]
                 labels = tokenizer.batch_decode(
-                    predict_results.label_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
+                    label_ids.tolist(), skip_special_tokens=True, clean_up_tokenization_spaces=True
                 )
                 labels = [label.strip() for label in labels]
                 assert len(labels) == len(list_test_samples)

@@ -4,8 +4,8 @@ lora_trainable='q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj'
 modules_to_save="null"
 lora_dropout=0.1
 LR=2e-4
-MAX_STEPS=16870
-SAVE_STEPS=1687
+MAX_STEPS=8440
+SAVE_STEPS=844
 MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 USER_DIR="/share/home/tm891982051140000/a945582010"
 model_name_or_path="resources/qwen2-7b"
@@ -28,7 +28,7 @@ export LD_PRELOAD="$CONDA_PREFIX/lib/libstdc++.so.6${LD_PRELOAD:+:$LD_PRELOAD}"
 
 # # Training Command
 
-deepspeed --num_gpus=2 --master_port $MASTER_PORT run_tacomoe.py \
+deepspeed --num_gpus=4 --master_port $MASTER_PORT run_tacomoe.py \
     --deepspeed src/ds.config \
     --do_train \
     --train_file $your_data_path/train.json \
