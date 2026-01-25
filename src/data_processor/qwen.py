@@ -30,7 +30,7 @@ class qwen2_train(object):
                 query = examples[self.prompt_column][i]
                 answer = examples[self.response_column][i]
                 
-                # 1. ¹¹Ôì Qwen2 ¸ñÊ½µÄ¶Ô»°ÊäÈë
+                # 1. ï¿½ï¿½ï¿½ï¿½ Qwen2 ï¿½ï¿½Ê½ï¿½Ä¶Ô»ï¿½ï¿½ï¿½ï¿½ï¿½
                 messages = []
                 if self.history_column and examples[self.history_column][i]:
                     print('this')
@@ -104,8 +104,9 @@ class qwen2_eval(object):
                 answer = examples[self.response_column][i]
                 messages = []
                 messages.append({"role": "user", "content": query})
-                messages.append({"role": "assistant", "content": answer})
-                conversation = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
+                # For inference/eval, do NOT include the assistant answer in the input prompts
+                # Use add_generation_prompt=True to append the assistant start token
+                conversation = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
                 
                 model_inputs['input_ids'].append(torch.tensor(self.tokenizer(conversation, add_special_tokens=False, padding='max_length',
                     truncation=True,
@@ -115,19 +116,9 @@ class qwen2_eval(object):
                     truncation=True,
                     max_length=self.data_args.max_source_length,
                     return_tensors='pt').attention_mask, dtype=torch.long).squeeze(0))
+                # Labels are not usually needed for pure generation prediction, but we keep a dummy or the input as placeholder
+                # If using compute_metrics with predict_with_generate, labels are matched against predictions externally
                 model_inputs["labels"].append(copy.deepcopy(model_inputs['input_ids'][-1]))
-                tmp_message = [
-                    {"role": "user", "content": query}, 
-                    {"role": "assistant", "content": answer}
-                ]
-                cur = 0
-                message = []
-                instruction = self.tokenizer.apply_chat_template(message + tmp_message[:1], tokenize=False, add_generation_prompt=True)
-                
-                instruction_len = len(torch.tensor(self.tokenizer(instruction, add_special_tokens=False).input_ids, dtype=torch.long))
-             
-            
-                model_inputs["labels"][-1][cur:instruction_len] = -100
             if self.task:
                 task_id = task_dict[examples['task_dataset'][i]]
                 model_inputs["task_id"].append(task_id)

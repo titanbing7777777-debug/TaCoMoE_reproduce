@@ -123,6 +123,8 @@ def main(parser):
         model_args.model_name_or_path,
         trust_remote_code=True,
     )
+    if "qwen" in model_args.model_name_or_path.lower():
+        tokenizer.padding_side = 'left'
 
     model = AutoModelForCausalLM.from_pretrained(
         model_args.model_name_or_path,
